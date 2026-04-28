@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Multi-Sig Wallet</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f0f13;
+      --surface: #1a1a22;
+      --surface2: #22222e;
+      --border: rgba(255,255,255,0.08);
+      --border2: rgba(255,255,255,0.14);
+      --text: #f0f0f4;
+      --text2: #9090a8;
+      --text3: #5a5a72;
+      --alice: #3b82f6;
+      --alice-bg: rgba(59,130,246,0.12);
+      --bob: #22c55e;
+      --bob-bg: rgba(34,197,94,0.12);
+      --charlie: #f59e0b;
+      --charlie-bg: rgba(245,158,11,0.12);
+      --accent: #7c3aed;
+      --accent-light: rgba(124,58,237,0.15);
+      --success: #22c55e;
+      --success-bg: rgba(34,197,94,0.12);
+      --danger: #ef4444;
+      --danger-bg: rgba(239,68,68,0.12);
+      --warn: #f59e0b;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 0;
+    }
+
+    /* ── HERO HEADER ── */
+    .hero {
+      background: linear-gradient(135deg, #0f0f13 0%, #1a0a2e 50%, #0f0f13 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 2.5rem 2rem 2rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -60px; left: 50%; transform: translateX(-50%);
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(124,58,237,0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--accent-light); border: 1px solid rgba(124,58,237,0.3);
+      border-radius: 20px; padding: 4px 14px;
+      font-size: 12px; color: #a78bfa; font-weight: 500;
+      margin-bottom: 1rem;
+      letter-spacing: 0.02em;
+    }
+    .hero h1 {
+      font-size: clamp(24px, 5vw, 40px);
+      font-weight: 700;
+      background: linear-gradient(135deg, #f0f0f4 0%, #a78bfa 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.75rem;
+      line-height: 1.2;
+    }
+    .hero p {
+      font-size: 15px; color: var(--text2); max-width: 540px; margin: 0 auto 1.5rem;
+      line-height: 1.6;
+    }
+    .hero-links {
+      display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+    }
+    .hero-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 18px; border-radius: 8px;
+      font-size: 13px; font-weight: 500; text-decoration: none;
+      transition: all 0.15s;
+    }
+    .hero-link.primary {
+      background: var(--accent); color: #fff; border: 1px solid transparent;
+    }
+    .hero-link.primary:hover { background: #6d28d9; }
+    .hero-link.secondary {
+      background: var(--surface); color: var(--text2);
+      border: 1px solid var(--border2);
+    }
+    .hero-link.secondary:hover { color: var(--text); border-color: var(--border2); background: var(--surface2); }
+
+    /* ── LAYOUT ── */
+    .app {
+      max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;
+    }
+    @media (max-width: 700px) { .app { grid-template-columns: 1fr; } }
+
+    .left-col { display: flex; flex-direction: column; gap: 1rem; }
+    .right-col { display: flex; flex-direction: column; gap: 1rem; }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 1.25rem;
+    }
+    .card-header {
+      font-size: 11px; font-weight: 600; color: var(--text3);
+      letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1rem;
+    }
+
+    /* ── BALANCE ── */
+    .balance-big {
+      font-size: 36px; font-weight: 700; color: var(--text);
+      font-variant-numeric: tabular-nums;
+    }
+    .balance-label { font-size: 13px; color: var(--text2); margin-top: 4px; }
+    .balance-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: var(--accent-light); border: 1px solid rgba(124,58,237,0.25);
+      border-radius: 20px; padding: 3px 10px;
+      font-size: 11px; color: #a78bfa; margin-top: 10px;
+      font-family: 'Courier New', monospace;
+    }
+
+    /* ── AGENTS ── */
+    .agents-grid { display: flex; flex-direction: column; gap: 8px; }
+    .agent-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: 10px;
+      border: 1px solid var(--border); background: var(--surface2);
+      transition: all 0.2s;
+    }
+    .agent-row.active-agent { border-color: rgba(124,58,237,0.4); background: var(--accent-light); }
+    .agent-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700; flex-shrink: 0;
+    }
+    .agent-info { flex: 1; }
+    .agent-name { font-size: 13px; font-weight: 600; color: var(--text); }
+    .agent-desc { font-size: 11px; color: var(--text3); margin-top: 1px; }
+    .agent-sig {
+      display: flex; align-items: center; gap: 4px;
+      font-size: 11px; padding: 3px 8px; border-radius: 20px;
+      font-weight: 500; transition: all 0.3s;
+    }
+    .sig-wait { background: var(--surface); color: var(--text3); border: 1px solid var(--border); }
+    .sig-thinking { background: rgba(245,158,11,0.15); color: var(--warn); border: 1px solid rgba(245,158,11,0.3); }
+    .sig-signed { background: var(--success-bg); color: var(--success); border: 1px solid rgba(34,197,94,0.3); }
+    .sig-refused { background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(239,68,68,0.3); }
+
+    /* ── POLICY ── */
+    .policy-chips { display: flex; flex-direction: column; gap: 6px; }
+    .policy-chip {
+      padding: 9px 12px; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--surface2);
+      cursor: pointer; transition: all 0.15s;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .policy-chip:hover { border-color: var(--border2); }
+    .policy-chip.active {
+      border-color: rgba(124,58,237,0.5);
+      background: var(--accent-light);
+    }
+    .chip-label { font-size: 13px; color: var(--text); }
+    .chip-expr { font-family: 'Courier New', monospace; font-size: 11px; color: #a78bfa; }
+    .chip-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border2); transition: all 0.15s; }
+    .policy-chip.active .chip-dot { background: var(--accent); }
+
+    /* ── FORM ── */
+    .form-group { margin-bottom: 10px; }
+    .form-group label { display: block; font-size: 11px; color: var(--text3); margin-bottom: 5px; font-weight: 500; letter-spacing: 0.04em; }
+    .form-group input {
+      width: 100%; padding: 9px 12px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text); font-size: 13px;
+      outline: none; transition: border-color 0.15s;
+    }
+    .form-group input:focus { border-color: rgba(124,58,237,0.5); }
+    .form-group input::placeholder { color: var(--text3); }
+    .propose-btn {
+      width: 100%; padding: 11px; border-radius: 9px;
+      background: var(--accent); border: none; color: #fff;
+      font-size: 14px; font-weight: 600; cursor: pointer;
+      transition: all 0.15s; letter-spacing: 0.01em;
+      margin-top: 4px;
+    }
+    .propose-btn:hover:not(:disabled) { background: #6d28d9; transform: translateY(-1px); }
+    .propose-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    .propose-btn.loading {
+      background: var(--surface2); color: var(--text2);
+      border: 1px solid var(--border);
+    }
+
+    /* ── DEBATE FEED ── */
+    .debate-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; overflow: hidden;
+      grid-column: 1 / -1;
+    }
+    .debate-topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 1.25rem; border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+    }
+    .debate-title { font-size: 12px; font-weight: 600; color: var(--text3); letter-spacing: 0.06em; text-transform: uppercase; }
+    .live-badge {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 11px; color: var(--success); font-weight: 500;
+    }
+    .live-dot {
+      width: 6px; height: 6px; border-radius: 50%; background: var(--success);
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+    .debate-feed {
+      padding: 1rem 1.25rem; min-height: 120px; max-height: 340px;
+      overflow-y: auto; display: flex; flex-direction: column; gap: 14px;
+    }
+    .empty { color: var(--text3); font-size: 13px; text-align: center; padding: 2rem; }
+
+    .msg { display: flex; gap: 10px; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+    .msg-ava {
+      width: 30px; height: 30px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; flex-shrink: 0;
+    }
+    .msg-body { flex: 1; }
+    .msg-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+    .msg-name { font-size: 12px; font-weight: 600; }
+    .msg-verdict {
+      font-size: 10px; padding: 2px 7px; border-radius: 20px; font-weight: 600;
+    }
+    .verdict-signed { background: var(--success-bg); color: var(--success); }
+    .verdict-refused { background: var(--danger-bg); color: var(--danger); }
+    .msg-text { font-size: 13px; color: var(--text2); line-height: 1.55; }
+
+    .sys-msg {
+      text-align: center; font-size: 11px; color: var(--text3);
+      padding: 6px 0; border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border); font-family: 'Courier New', monospace;
+      animation: fadeIn 0.3s ease;
+    }
+
+    /* ── RESULT ── */
+    .result-banner {
+      padding: 14px 1.25rem; display: flex; align-items: center; gap: 10px;
+      border-top: 1px solid var(--border); font-size: 14px; font-weight: 500;
+      animation: fadeIn 0.4s ease;
+    }
+    .result-ok { background: var(--success-bg); color: var(--success); }
+    .result-no { background: var(--danger-bg); color: var(--danger); }
+    .result-icon { font-size: 18px; }
+
+    /* ── TYPING ── */
+    .typing-indicator { display: flex; gap: 4px; align-items: center; padding: 6px 0; }
+    .typing-dot {
+      width: 6px; height: 6px; border-radius: 50%; background: var(--text3);
+      animation: bounce 1.2s infinite;
+    }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce { 0%,60%,100%{transform:none;opacity:0.4} 30%{transform:translateY(-5px);opacity:1} }
+
+    /* ── FOOTER ── */
+    .footer {
+      text-align: center; padding: 2rem; font-size: 12px; color: var(--text3);
+      border-top: 1px solid var(--border); margin-top: 1rem;
+    }
+    .footer a { color: #a78bfa; text-decoration: none; }
+    .footer a:hover { text-decoration: underline; }
+
+    /* ── HOW IT WORKS ── */
+    .how-section {
+      max-width: 900px; margin: 0 auto; padding: 0 1.5rem 2rem;
+    }
+    .how-title {
+      font-size: 14px; font-weight: 600; color: var(--text2);
+      margin-bottom: 1rem; letter-spacing: 0.04em;
+    }
+    .how-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    @media (max-width: 600px) { .how-grid { grid-template-columns: 1fr; } }
+    .how-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1rem;
+    }
+    .how-num {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: var(--accent-light); border: 1px solid rgba(124,58,237,0.3);
+      color: #a78bfa; font-size: 11px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; margin-bottom: 8px;
+    }
+    .how-head { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+    .how-body { font-size: 12px; color: var(--text3); line-height: 1.5; }
+  </style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-badge">⬡ Powered by Hyperledger boolpolicy + Claude AI</div>
+  <h1>AI Multi-Sig Wallet</h1>
+  <p>Three AI agents with distinct personalities co-own tokens. They debate every transaction and sign only if your boolean policy is satisfied.</p>
+  <div class="hero-links">
+    <a class="hero-link primary" href="https://github.com/sid200727/ai-multisig-wallet">★ Star on GitHub</a>
+    <a class="hero-link secondary" href="https://github.com/hyperledger-labs/fabric-token-sdk/pull/1597">View PR #1597</a>
+  </div>
+</div>
+
+<div class="app">
+  <div class="left-col">
+
+    <!-- Balance -->
+    <div class="card">
+      <div class="card-header">Vault Balance</div>
+      <div class="balance-big" id="balance-display">1,000 TKN</div>
+      <div class="balance-label">Locked under policy signature</div>
+      <div class="balance-pill" id="policy-display">$0 OR $1</div>
+    </div>
+
+    <!-- Agents -->
+    <div class="card">
+      <div class="card-header">Co-Owners</div>
+      <div class="agents-grid">
+        <div class="agent-row" id="row-alice">
+          <div class="agent-avatar" style="background:var(--alice-bg);color:var(--alice);">AL</div>
+          <div class="agent-info">
+            <div class="agent-name">Alice</div>
+            <div class="agent-desc">Risk-averse · Index $0</div>
+          </div>
+          <div class="agent-sig sig-wait" id="sig-alice">— idle</div>
+        </div>
+        <div class="agent-row" id="row-bob">
+          <div class="agent-avatar" style="background:var(--bob-bg);color:var(--bob);">BO</div>
+          <div class="agent-info">
+            <div class="agent-name">Bob</div>
+            <div class="agent-desc">Pragmatic · Index $1</div>
+          </div>
+          <div class="agent-sig sig-wait" id="sig-bob">— idle</div>
+        </div>
+        <div class="agent-row" id="row-charlie">
+          <div class="agent-avatar" style="background:var(--charlie-bg);color:var(--charlie);">CH</div>
+          <div class="agent-info">
+            <div class="agent-name">Charlie</div>
+            <div class="agent-desc">Aggressive · Index $2</div>
+          </div>
+          <div class="agent-sig sig-wait" id="sig-charlie">— idle</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="right-col">
+
+    <!-- Policy -->
+    <div class="card">
+      <div class="card-header">Signing Policy</div>
+      <div class="policy-chips">
+        <div class="policy-chip active" onclick="setPolicy('$0 OR $1','Alice OR Bob',this)">
+          <span class="chip-label">Alice OR Bob</span>
+          <span class="chip-expr">$0 OR $1</span>
+          <span class="chip-dot"></span>
+        </div>
+        <div class="policy-chip" onclick="setPolicy('$0 AND $1','Alice AND Bob',this)">
+          <span class="chip-label">Alice AND Bob</span>
+          <span class="chip-expr">$0 AND $1</span>
+          <span class="chip-dot"></span>
+        </div>
+        <div class="policy-chip" onclick="setPolicy('$0 AND $1 AND $2','All Three',this)">
+          <span class="chip-label">All Three</span>
+          <span class="chip-expr">$0 AND $1 AND $2</span>
+          <span class="chip-dot"></span>
+        </div>
+        <div class="policy-chip" onclick="setPolicy('($0 AND $1) OR $2','(Alice AND Bob) OR Charlie',this)">
+          <span class="chip-label">(Alice AND Bob) OR Charlie</span>
+          <span class="chip-expr">($0 AND $1) OR $2</span>
+          <span class="chip-dot"></span>
+        </div>
+        <div class="policy-chip" onclick="setPolicy('$2','Charlie Alone',this)">
+          <span class="chip-label">Charlie Alone</span>
+          <span class="chip-expr">$2</span>
+          <span class="chip-dot"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TX Form -->
+    <div class="card">
+      <div class="card-header">Propose Transaction</div>
+      <div class="form-group">
+        <label>RECIPIENT</label>
+        <input id="f-recipient" type="text" value="Dave" placeholder="Who receives the tokens?" />
+      </div>
+      <div class="form-group">
+        <label>AMOUNT (TKN)</label>
+        <input id="f-amount" type="number" value="250" min="1" max="9999" />
+      </div>
+      <div class="form-group">
+        <label>REASON</label>
+        <input id="f-reason" type="text" value="Q2 vendor payment for cloud infrastructure" placeholder="Why this transaction?" />
+      </div>
+      <button class="propose-btn" id="propose-btn" onclick="propose()">
+        Propose Transaction →
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Debate Feed (full width) -->
+  <div class="debate-card">
+    <div class="debate-topbar">
+      <span class="debate-title">Agent Debate Chamber</span>
+      <span class="live-badge" id="live-badge" style="display:none">
+        <span class="live-dot"></span> Live
+      </span>
+    </div>
+    <div class="debate-feed" id="debate-feed">
+      <div class="empty">Propose a transaction to start the debate ↑</div>
+    </div>
+    <div id="result-area"></div>
+  </div>
+
+</div>
+
+<!-- How it works -->
+<div class="how-section">
+  <div class="how-title">HOW IT WORKS</div>
+  <div class="how-grid">
+    <div class="how-card">
+      <div class="how-num">1</div>
+      <div class="how-head">Boolean Policy Engine</div>
+      <div class="how-body">Built on the boolpolicy package from Hyperledger fabric-token-sdk PR #1597. Expressions like <code style="color:#a78bfa">($0 AND $1) OR $2</code> are evaluated against agent signatures.</div>
+    </div>
+    <div class="how-card">
+      <div class="how-num">2</div>
+      <div class="how-head">AI Agent Personalities</div>
+      <div class="how-body">Each agent is a Claude AI instance with a distinct personality. Alice is cautious, Bob is pragmatic, Charlie is aggressive. They read each other's responses and react.</div>
+    </div>
+    <div class="how-card">
+      <div class="how-num">3</div>
+      <div class="how-head">Signature Collection</div>
+      <div class="how-body">After all required agents respond with SIGN or REFUSE, the policy expression is evaluated. If satisfied, the token transfer executes. If not, it's rejected.</div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  Built by <a href="https://github.com/sid200727">Siddhi Khandelwal</a> ·
+  Based on <a href="https://github.com/hyperledger-labs/fabric-token-sdk/pull/1597">fabric-token-sdk PR #1597</a> ·
+  Powered by <a href="https://www.anthropic.com">Claude AI</a>
+</div>
+
+<script>
+  const ANTHROPIC_KEY = 'YOUR_API_KEY_HERE';
+
+  let balance = 1000;
+  let activePolicy = '$0 OR $1';
+  let running = false;
+
+  const agents = {
+    alice: {
+      name: 'Alice', short: 'AL', index: 0,
+      color: 'var(--alice)', bg: 'var(--alice-bg)',
+      system: `You are Alice, a cautious risk-averse financial agent who co-owns tokens in a multi-signature blockchain wallet.
+You scrutinize every transaction for security risks, compliance issues, and whether the amount is justified relative to the vault size.
+You are skeptical of large amounts and vague reasons. You speak in 2-3 sharp sentences.
+You MUST end your response with exactly one word on its own line: either SIGN or REFUSE.`
+    },
+    bob: {
+      name: 'Bob', short: 'BO', index: 1,
+      color: 'var(--bob)', bg: 'var(--bob-bg)',
+      system: `You are Bob, a pragmatic business-focused agent who co-owns tokens in a multi-signature blockchain wallet.
+You evaluate transactions based on legitimate business value. You're open to signing if the reason is clear and the amount is reasonable.
+You sometimes push back on Alice's over-caution but you won't approve anything suspicious. You speak in 2-3 direct sentences.
+You MUST end your response with exactly one word on its own line: either SIGN or REFUSE.`
+    },
+    charlie: {
+      name: 'Charlie', short: 'CH', index: 2,
+      color: 'var(--charlie)', bg: 'var(--charlie-bg)',
+      system: `You are Charlie, an aggressive growth-focused agent who co-owns tokens in a multi-signature blockchain wallet.
+You move fast and approve transactions that make business sense. You're impatient with over-caution but will refuse anything genuinely suspicious.
+You sometimes call out Alice for being too conservative. You speak in 2-3 punchy sentences.
+You MUST end your response with exactly one word on its own line: either SIGN or REFUSE.`
+    }
+  };
+
+  function setPolicy(expr, label, el) {
+    activePolicy = expr;
+    document.getElementById('policy-display').textContent = expr;
+    document.querySelectorAll('.policy-chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  function setSig(agent, state, label) {
+    const el = document.getElementById(`sig-${agent}`);
+    el.className = `agent-sig sig-${state}`;
+    el.textContent = label;
+  }
+
+  function resetAgents() {
+    ['alice','bob','charlie'].forEach(a => setSig(a, 'wait', '— idle'));
+  }
+
+  function addMsg(agentKey, text, verdict) {
+    const feed = document.getElementById('debate-feed');
+    const a = agents[agentKey];
+    const div = document.createElement('div');
+    div.className = 'msg';
+    const verdictBadge = verdict === 'signed'
+      ? `<span class="msg-verdict verdict-signed">✓ SIGNED</span>`
+      : `<span class="msg-verdict verdict-refused">✗ REFUSED</span>`;
+    div.innerHTML = `
+      <div class="msg-ava" style="background:${a.bg};color:${a.color};">${a.short}</div>
+      <div class="msg-body">
+        <div class="msg-header">
+          <span class="msg-name" style="color:${a.color}">${a.name}</span>
+          ${verdictBadge}
+        </div>
+        <div class="msg-text">${text}</div>
+      </div>`;
+    feed.appendChild(div);
+    feed.scrollTop = feed.scrollHeight;
+  }
+
+  function addTyping(agentKey) {
+    const feed = document.getElementById('debate-feed');
+    const a = agents[agentKey];
+    const div = document.createElement('div');
+    div.className = 'msg'; div.id = `typing-${agentKey}`;
+    div.innerHTML = `
+      <div class="msg-ava" style="background:${a.bg};color:${a.color};">${a.short}</div>
+      <div class="msg-body">
+        <div class="msg-header"><span class="msg-name" style="color:${a.color}">${a.name}</span></div>
+        <div class="typing-indicator">
+          <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
+        </div>
+      </div>`;
+    feed.appendChild(div);
+    feed.scrollTop = feed.scrollHeight;
+  }
+
+  function removeTyping(agentKey) {
+    const el = document.getElementById(`typing-${agentKey}`);
+    if (el) el.remove();
+  }
+
+  function addSys(text) {
+    const feed = document.getElementById('debate-feed');
+    const div = document.createElement('div');
+    div.className = 'sys-msg';
+    div.textContent = text;
+    feed.appendChild(div);
+    feed.scrollTop = feed.scrollHeight;
+  }
+
+  function evalPolicy(policy, sigs) {
+    let expr = policy;
+    expr = expr.replace(/\$0/g, sigs[0]).replace(/\$1/g, sigs[1]).replace(/\$2/g, sigs[2]);
+    try { return Function('"use strict"; return (' + expr + ')')(); } catch { return false; }
+  }
+
+  async function callAgent(agentKey, tx, prevMsgs) {
+    const a = agents[agentKey];
+    let context = '';
+    if (prevMsgs.length > 0) {
+      context = '\n\nOther agents have already commented:\n'
+        + prevMsgs.map(m => `${m.name}: ${m.text}`).join('\n')
+        + '\n\nBriefly react to what they said, then give your own verdict.';
+    }
+    const userMsg = `Transaction details:\n- Recipient: ${tx.recipient}\n- Amount: ${tx.amount} TKN (vault total: ${balance} TKN)\n- Reason: ${tx.reason}\n- Active signing policy: ${tx.policy}${context}\n\nGive your verdict now.`;
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: a.system,
+        messages: [{ role: 'user', content: userMsg }]
+      })
+    });
+    const data = await res.json();
+    return data.content?.[0]?.text || '';
+  }
+
+  async function propose() {
+    if (running) return;
+    const key = ANTHROPIC_KEY;
+    if (key === 'YOUR_API_KEY_HERE' || !key) {
+      alert('Add your Anthropic API key to the ANTHROPIC_KEY variable in index.html');
+      return;
+    }
+
+    const recipient = document.getElementById('f-recipient').value.trim() || 'Unknown';
+    const amount = parseInt(document.getElementById('f-amount').value) || 100;
+    const reason = document.getElementById('f-reason').value.trim() || 'No reason given';
+
+    running = true;
+    const btn = document.getElementById('propose-btn');
+    btn.disabled = true; btn.textContent = 'Debate in progress...';
+    btn.classList.add('loading');
+    document.getElementById('live-badge').style.display = 'flex';
+    document.getElementById('debate-feed').innerHTML = '';
+    document.getElementById('result-area').innerHTML = '';
+    resetAgents();
+
+    const tx = { recipient, amount, reason, policy: activePolicy };
+    const sigs = [false, false, false];
+    const prevMsgs = [];
+
+    addSys(`TX: ${amount} TKN → ${recipient} | Policy: ${activePolicy} | Reason: ${reason}`);
+
+    const order = ['alice','bob','charlie'].filter(a => activePolicy.includes(`$${agents[a].index}`));
+    const unique = [...new Set(order)];
+
+    for (const agentKey of unique) {
+      setSig(agentKey, 'thinking', '⟳ thinking');
+      addTyping(agentKey);
+      try {
+        const reply = await callAgent(agentKey, tx, prevMsgs);
+        removeTyping(agentKey);
+        const lines = reply.split('\n').map(l => l.trim()).filter(Boolean);
+        const lastWord = lines[lines.length - 1].toUpperCase();
+        const signed = lastWord === 'SIGN';
+        const clean = lines.filter(l => l.toUpperCase() !== 'SIGN' && l.toUpperCase() !== 'REFUSE').join(' ');
+        sigs[agents[agentKey].index] = signed;
+        prevMsgs.push({ name: agents[agentKey].name, text: clean });
+        setSig(agentKey, signed ? 'signed' : 'refused', signed ? '✓ signed' : '✗ refused');
+        addMsg(agentKey, clean, signed ? 'signed' : 'refused');
+        await new Promise(r => setTimeout(r, 500));
+      } catch (err) {
+        removeTyping(agentKey);
+        setSig(agentKey, 'refused', '✗ error');
+        addMsg(agentKey, `Connection error — defaulting to REFUSE. (${err.message})`, 'refused');
+      }
+    }
+
+    const approved = evalPolicy(activePolicy, sigs);
+    addSys(`Policy [${activePolicy}] evaluated → ${approved ? 'APPROVED ✓' : 'REJECTED ✗'}`);
+
+    const resultEl = document.getElementById('result-area');
+    if (approved) {
+      balance -= amount;
+      document.getElementById('balance-display').textContent = balance.toLocaleString() + ' TKN';
+      resultEl.innerHTML = `<div class="result-banner result-ok"><span class="result-icon">✓</span> ${amount} TKN sent to ${recipient}. New balance: ${balance.toLocaleString()} TKN.</div>`;
+    } else {
+      resultEl.innerHTML = `<div class="result-banner result-no"><span class="result-icon">✗</span> Transaction rejected. Policy not satisfied. Balance unchanged.</div>`;
+    }
+
+    document.getElementById('live-badge').style.display = 'none';
+    btn.disabled = false; btn.textContent = 'Propose Transaction →';
+    btn.classList.remove('loading');
+    running = false;
+  }
+</script>
+
+</body>
+</html>
