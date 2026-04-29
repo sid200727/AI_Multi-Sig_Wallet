@@ -14,6 +14,7 @@
 
 </div>
 
+
 ## What is this?
 
 This project is a live interactive demo of [`boolpolicy`](https://github.com/hyperledger-labs/fabric-token-sdk/pull/1597) — a new identity type I implemented in [Hyperledger fabric-token-sdk](https://github.com/hyperledger-labs/fabric-token-sdk) that allows token ownership to be governed by a **boolean expression** over a set of identities.
@@ -40,11 +41,30 @@ Here, each signer `$N` is replaced by a **Claude AI agent** with a unique person
 
 Each agent is a separate Claude API call with a carefully crafted system prompt. They receive what previous agents said and **react to each other** — making the debate feel genuinely dynamic.
 
-## 🎮 How to Use
+
+## 🔑 Getting Your Anthropic API Key
+
+This app uses the Claude AI API to power the agent debates. Each debate costs roughly **$0.01–0.03** depending on how much the agents write.
+
+**Step-by-step:**
+
+1. Go to **[console.anthropic.com](https://console.anthropic.com)**
+2. Sign up for a free account (email + phone verification)
+3. New accounts get **$5 free credits** — enough for ~200 debates
+4. In the left sidebar, click **API Keys**
+5. Click **Create Key**, give it any name
+6. Copy the key — it looks like `sk-ant-api03-...`
+7. Paste it into the modal when you open the app
+
+> **Privacy note:** Your API key is stored only in your browser's session memory. It's never sent to any server other than Anthropic's API directly. It's cleared automatically when you close the tab.
+
+After the free $5 runs out, you'll need to add a payment method at [console.anthropic.com/settings/billing](https://console.anthropic.com/settings/billing). Claude API is pay-as-you-go — no monthly subscription.
+
+
 
 ### Option 1 — GitHub Pages (recommended)
 
-Just visit: **[sid200727.github.io/ai-multisig-wallet](https://sid200727.github.io/ai-multisig-wallet)**
+Just visit: **[sid200727.github.io/ai-multisig-wallet](https://sid200727.github.io/AI_Multi-Sig_Wallet/)**
 
 You'll be prompted to enter your Anthropic API key in the page.
 
@@ -67,6 +87,7 @@ const ANTHROPIC_KEY = 'sk-ant-...your-key-here...';
 ```
 
 Get a free API key at [console.anthropic.com](https://console.anthropic.com).
+
 
 ## ⚙️ The boolpolicy Engine
 
@@ -115,6 +136,7 @@ function evalPolicy(policy, sigs) {
   return Function('"use strict"; return (' + expr + ')')();
 }
 ```
+
 
 ## 🧠 Code Walkthrough
 
