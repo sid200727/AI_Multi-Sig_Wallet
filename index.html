@@ -460,7 +460,7 @@
 </div>
 
 <script>
-  const ANTHROPIC_KEY = 'YOUR_API_KEY_HERE';
+  let ANTHROPIC_KEY = sessionStorage.getItem('ak') || '';
 
   let balance = 1000;
   let activePolicy = '$0 OR $1';
@@ -580,7 +580,7 @@ You MUST end your response with exactly one word on its own line: either SIGN or
 
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_KEY, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-allow-browser': 'true' },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 1000,
@@ -595,8 +595,9 @@ You MUST end your response with exactly one word on its own line: either SIGN or
   async function propose() {
     if (running) return;
     const key = ANTHROPIC_KEY;
-    if (key === 'YOUR_API_KEY_HERE' || !key) {
-      alert('Add your Anthropic API key to the ANTHROPIC_KEY variable in index.html');
+    if (!key) {
+      showKeyModal();
+      running = false;
       return;
     }
 
@@ -660,6 +661,55 @@ You MUST end your response with exactly one word on its own line: either SIGN or
     btn.disabled = false; btn.textContent = 'Propose Transaction →';
     btn.classList.remove('loading');
     running = false;
+  }
+</script>
+
+<!-- API Key Modal -->
+<div id="key-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:999;align-items:center;justify-content:center;">
+  <div style="background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:2rem;max-width:420px;width:90%;margin:auto;">
+    <div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:8px;">Enter Anthropic API Key</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:1.5rem;line-height:1.6;">
+      Your key is stored in session memory only — never sent anywhere except the Anthropic API. 
+      Get one free at <a href="https://console.anthropic.com" target="_blank" style="color:#a78bfa;">console.anthropic.com</a>
+    </div>
+    <input id="key-input" type="password" placeholder="sk-ant-api03-..." 
+      style="width:100%;padding:10px 12px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:13px;outline:none;margin-bottom:12px;font-family:monospace;" />
+    <div style="display:flex;gap:8px;">
+      <button onclick="saveKey()" style="flex:1;padding:10px;background:var(--accent);border:none;border-radius:8px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;">
+        Save & Continue
+      </button>
+      <button onclick="document.getElementById('key-modal').style.display='none'" 
+        style="padding:10px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:14px;cursor:pointer;">
+        Cancel
+      </button>
+    </div>
+    <div style="font-size:11px;color:var(--text3);margin-top:10px;text-align:center;">
+      🔒 Key is only stored in your browser session — cleared when you close the tab
+    </div>
+  </div>
+</div>
+
+<script>
+  function showKeyModal() {
+    const m = document.getElementById('key-modal');
+    m.style.display = 'flex';
+    setTimeout(() => document.getElementById('key-input').focus(), 100);
+  }
+  function saveKey() {
+    const val = document.getElementById('key-input').value.trim();
+    if (!val.startsWith('sk-')) {
+      document.getElementById('key-input').style.borderColor = 'var(--danger)';
+      return;
+    }
+    ANTHROPIC_KEY = val;
+    sessionStorage.setItem('ak', val);
+    document.getElementById('key-modal').style.display = 'none';
+  }
+  document.getElementById('key-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') saveKey();
+  });
+  if (!ANTHROPIC_KEY) {
+    setTimeout(showKeyModal, 800);
   }
 </script>
 
