@@ -18,7 +18,7 @@
 
 ## What is this?
 
-This project is a live interactive demo of [`boolpolicy`](https://github.com/hyperledger-labs/fabric-token-sdk/pull/1597) — a new identity type I implemented in [Hyperledger fabric-token-sdk](https://github.com/hyperledger-labs/fabric-token-sdk) that allows token ownership to be governed by a **boolean expression** over a set of identities.
+This project is a live interactive demo of [`boolpolicy`](https://github.com/hyperledger-labs/fabric-token-sdk/pull/1597)  a new identity type I implemented in [Hyperledger fabric-token-sdk](https://github.com/hyperledger-labs/fabric-token-sdk) that allows token ownership to be governed by a **boolean expression** over a set of identities.
 
 Instead of "all signers must sign" (the old AND-only multi-sig), `boolpolicy` supports any boolean combination:
 
@@ -31,7 +31,6 @@ $0 AND $1 AND $2      → all three must agree
 
 Here, each signer `$N` is replaced by a **Claude AI agent** with a unique personality. They read the transaction, debate it in real-time, and sign or refuse based on their character.
 
----
 
 ## The Agents
 
@@ -43,7 +42,6 @@ Here, each signer `$N` is replaced by a **Claude AI agent** with a unique person
 
 Each agent is a separate Claude API call with a carefully crafted system prompt. They receive what previous agents said and **react to each other** — making the debate feel genuinely dynamic.
 
----
 
 ## 🔑 Getting Your API Key (Free — No Credit Card)
 
@@ -80,16 +78,15 @@ cd ai-multisig-wallet
 open index.html
 ```
 
-Then add your Anthropic API key to `index.html`:
+Then add your AI Studio API key to `index.html`:
 
 ```js
 // Line ~290 in index.html
 const ANTHROPIC_KEY = 'sk-ant-...your-key-here...';
 ```
 
-Get a free API key at [console.anthropic.com](https://console.anthropic.com).
+Get a free API key at [console.aistudio.google.com](https://aistudio.google.com/prompts/new_chat).
 
----
 
 ## ⚙️ The boolpolicy Engine
 
@@ -139,7 +136,6 @@ function evalPolicy(policy, sigs) {
 }
 ```
 
----
 
 ## 🧠 Code Walkthrough
 
@@ -202,7 +198,6 @@ const displayText = lines
   .join(' ');
 ```
 
----
 
 ## 🧪 Try These Scenarios
 
@@ -214,7 +209,6 @@ const displayText = lines
 | `($0 AND $1) OR $2` | 500 TKN, "risky bet" | Alice+Bob split → depends on Charlie |
 | `$0 AND $1 AND $2` | 1 TKN, "test payment" | All three must agree |
 
----
 
 ## 🔗 Related
 
@@ -223,7 +217,6 @@ const displayText = lines
 - [Hyperledger fabric-token-sdk](https://github.com/hyperledger-labs/fabric-token-sdk) — UTXO-based token SDK with ZK privacy
 - [Hyperledger fabric-smart-client](https://github.com/hyperledger-labs/fabric-smart-client) — the FSC layer beneath
 
----
 
 ## 👤 Author
 
@@ -232,8 +225,6 @@ const displayText = lines
 - GitHub: [@sid200727](https://github.com/sid200727)
 - fabric-token-sdk contributions: [view PRs](https://github.com/hyperledger-labs/fabric-token-sdk/pulls?q=is%3Apr+author%3Asid200727)
 - fabric-smart-client contributions: [view PRs](https://github.com/hyperledger-labs/fabric-smart-client/pulls?q=is%3Apr+author%3Asid200727)
-
----
 
 ## License
 
