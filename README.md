@@ -42,23 +42,21 @@ Here, each signer `$N` is replaced by a **Claude AI agent** with a unique person
 Each agent is a separate Claude API call with a carefully crafted system prompt. They receive what previous agents said and **react to each other** — making the debate feel genuinely dynamic.
 
 
-## 🔑 Getting Your Anthropic API Key
+## 🔑 Getting Your API Key (Free — No Credit Card)
 
-This app uses the Claude AI API to power the agent debates. Each debate costs roughly **$0.01–0.03** depending on how much the agents write.
+This app uses the **Google Gemini API** which has a **completely free tier** — no credit card required.
 
 **Step-by-step:**
 
-1. Go to **[console.anthropic.com](https://console.anthropic.com)**
-2. Sign up for a free account (email + phone verification)
-3. New accounts get **$5 free credits** — enough for ~200 debates
-4. In the left sidebar, click **API Keys**
-5. Click **Create Key**, give it any name
-6. Copy the key — it looks like `sk-ant-api03-...`
-7. Paste it into the modal when you open the app
+1. Go to **[aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey)**
+2. Sign in with your Google account
+3. Click **Create API Key**
+4. Copy the key — it looks like `AIzaSy...`
+5. Paste it into the modal when you open the app
 
-> **Privacy note:** Your API key is stored only in your browser's session memory. It's never sent to any server other than Anthropic's API directly. It's cleared automatically when you close the tab.
+That's it. The free tier gives you 15 requests per minute and 1 million tokens per day — more than enough for hundreds of debates.
 
-After the free $5 runs out, you'll need to add a payment method at [console.anthropic.com/settings/billing](https://console.anthropic.com/settings/billing). Claude API is pay-as-you-go — no monthly subscription.
+> **Privacy note:** Your API key is stored only in your browser's session memory. It's never sent to any server other than Google's Gemini API directly. It's cleared automatically when you close the tab.
 
 
 
@@ -79,14 +77,9 @@ cd ai-multisig-wallet
 open index.html
 ```
 
-Then add your Anthropic API key to `index.html`:
+Then paste your Gemini API key into the modal that appears when you open the app.
 
-```js
-// Line ~290 in index.html
-const ANTHROPIC_KEY = 'sk-ant-...your-key-here...';
-```
-
-Get a free API key at [console.anthropic.com](https://console.anthropic.com).
+Get a **completely free** API key (no credit card) at [aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey).
 
 
 ## ⚙️ The boolpolicy Engine
@@ -226,6 +219,7 @@ const displayText = lines
 - GitHub: [@sid200727](https://github.com/sid200727)
 - fabric-token-sdk contributions: [view PRs](https://github.com/hyperledger-labs/fabric-token-sdk/pulls?q=is%3Apr+author%3Asid200727)
 - fabric-smart-client contributions: [view PRs](https://github.com/hyperledger-labs/fabric-smart-client/pulls?q=is%3Apr+author%3Asid200727)
+
 
 ## License
 
