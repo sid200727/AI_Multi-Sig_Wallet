@@ -306,7 +306,7 @@
 <body>
 
 <div class="hero">
-  <div class="hero-badge">⬡ Powered by Hyperledger boolpolicy + Claude AI</div>
+  <div class="hero-badge">⬡ Powered by Hyperledger boolpolicy + Gemini AI (free)</div>
   <h1>AI Multi-Sig Wallet</h1>
   <p>Three AI agents with distinct personalities co-own tokens. They debate every transaction and sign only if your boolean policy is satisfied.</p>
   <div class="hero-links">
@@ -456,11 +456,11 @@
 <div class="footer">
   Built by <a href="https://github.com/sid200727">Siddhi Khandelwal</a> ·
   Based on <a href="https://github.com/hyperledger-labs/fabric-token-sdk/pull/1597">fabric-token-sdk PR #1597</a> ·
-  Powered by <a href="https://www.anthropic.com">Claude AI</a>
+  Powered by <a href="https://deepmind.google/gemini/">Google Gemini AI</a>
 </div>
 
 <script>
-  let ANTHROPIC_KEY = sessionStorage.getItem('ak') || '';
+  let GEMINI_KEY = sessionStorage.getItem('gk') || '';
 
   let balance = 1000;
   let activePolicy = '$0 OR $1';
@@ -578,23 +578,26 @@ You MUST end your response with exactly one word on its own line: either SIGN or
     }
     const userMsg = `Transaction details:\n- Recipient: ${tx.recipient}\n- Amount: ${tx.amount} TKN (vault total: ${balance} TKN)\n- Reason: ${tx.reason}\n- Active signing policy: ${tx.policy}${context}\n\nGive your verdict now.`;
 
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_KEY, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-allow-browser': 'true' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: a.system,
-        messages: [{ role: 'user', content: userMsg }]
-      })
-    });
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: a.system }] },
+          contents: [{ role: 'user', parts: [{ text: userMsg }] }],
+          generationConfig: { maxOutputTokens: 300, temperature: 0.9 }
+        })
+      }
+    );
     const data = await res.json();
-    return data.content?.[0]?.text || '';
+    if (data.error) throw new Error(data.error.message);
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
   }
 
   async function propose() {
     if (running) return;
-    const key = ANTHROPIC_KEY;
+    const key = GEMINI_KEY;
     if (!key) {
       showKeyModal();
       running = false;
@@ -667,12 +670,12 @@ You MUST end your response with exactly one word on its own line: either SIGN or
 <!-- API Key Modal -->
 <div id="key-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:999;align-items:center;justify-content:center;">
   <div style="background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:2rem;max-width:420px;width:90%;margin:auto;">
-    <div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:8px;">Enter Anthropic API Key</div>
+    <div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:8px;">Enter Google Gemini API Key</div>
     <div style="font-size:13px;color:var(--text2);margin-bottom:1.5rem;line-height:1.6;">
-      Your key is stored in session memory only — never sent anywhere except the Anthropic API. 
-      Get one free at <a href="https://console.anthropic.com" target="_blank" style="color:#a78bfa;">console.anthropic.com</a>
+      Your key is stored in session memory only — never sent anywhere except the Google Gemini API. 
+      Get one <strong>completely free</strong> (no credit card) at <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:#a78bfa;">aistudio.google.com</a>
     </div>
-    <input id="key-input" type="password" placeholder="sk-ant-api03-..." 
+    <input id="key-input" type="password" placeholder="AIza..." 
       style="width:100%;padding:10px 12px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:13px;outline:none;margin-bottom:12px;font-family:monospace;" />
     <div style="display:flex;gap:8px;">
       <button onclick="saveKey()" style="flex:1;padding:10px;background:var(--accent);border:none;border-radius:8px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;">
@@ -697,18 +700,18 @@ You MUST end your response with exactly one word on its own line: either SIGN or
   }
   function saveKey() {
     const val = document.getElementById('key-input').value.trim();
-    if (!val.startsWith('sk-')) {
+    if (!val.startsWith('AIza')) {
       document.getElementById('key-input').style.borderColor = 'var(--danger)';
       return;
     }
-    ANTHROPIC_KEY = val;
-    sessionStorage.setItem('ak', val);
+    GEMINI_KEY = val;
+    sessionStorage.setItem('gk', val);
     document.getElementById('key-modal').style.display = 'none';
   }
   document.getElementById('key-input').addEventListener('keydown', e => {
     if (e.key === 'Enter') saveKey();
   });
-  if (!ANTHROPIC_KEY) {
+  if (!GEMINI_KEY) {
     setTimeout(showKeyModal, 800);
   }
 </script>
