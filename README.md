@@ -14,6 +14,7 @@
 
 </div>
 
+---
 
 ## What is this?
 
@@ -30,6 +31,7 @@ $0 AND $1 AND $2      → all three must agree
 
 Here, each signer `$N` is replaced by a **Claude AI agent** with a unique personality. They read the transaction, debate it in real-time, and sign or refuse based on their character.
 
+---
 
 ## The Agents
 
@@ -41,6 +43,7 @@ Here, each signer `$N` is replaced by a **Claude AI agent** with a unique person
 
 Each agent is a separate Claude API call with a carefully crafted system prompt. They receive what previous agents said and **react to each other** — making the debate feel genuinely dynamic.
 
+---
 
 ## 🔑 Getting Your API Key (Free — No Credit Card)
 
@@ -62,9 +65,9 @@ That's it. The free tier gives you 15 requests per minute and 1 million tokens p
 
 ### Option 1 — GitHub Pages (recommended)
 
-Just visit: **[sid200727.github.io/ai-multisig-wallet](https://sid200727.github.io/AI_Multi-Sig_Wallet/)**
+Just visit: **[https://github.com/sid200727/AI_Multi-Sig_Wallet](https://sid200727.github.io/AI_Multi-Sig_Wallet/)**
 
-You'll be prompted to enter your Anthropic API key in the page.
+You'll be prompted to enter your AI Studio(Google) API key in the page.
 
 ### Option 2 — Run Locally
 
@@ -77,10 +80,16 @@ cd ai-multisig-wallet
 open index.html
 ```
 
-Then paste your Gemini API key into the modal that appears when you open the app.
+Then add your Anthropic API key to `index.html`:
 
-Get a **completely free** API key (no credit card) at [aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey).
+```js
+// Line ~290 in index.html
+const ANTHROPIC_KEY = 'sk-ant-...your-key-here...';
+```
 
+Get a free API key at [console.anthropic.com](https://console.anthropic.com).
+
+---
 
 ## ⚙️ The boolpolicy Engine
 
@@ -130,6 +139,7 @@ function evalPolicy(policy, sigs) {
 }
 ```
 
+---
 
 ## 🧠 Code Walkthrough
 
@@ -192,6 +202,7 @@ const displayText = lines
   .join(' ');
 ```
 
+---
 
 ## 🧪 Try These Scenarios
 
@@ -203,6 +214,7 @@ const displayText = lines
 | `($0 AND $1) OR $2` | 500 TKN, "risky bet" | Alice+Bob split → depends on Charlie |
 | `$0 AND $1 AND $2` | 1 TKN, "test payment" | All three must agree |
 
+---
 
 ## 🔗 Related
 
@@ -211,6 +223,7 @@ const displayText = lines
 - [Hyperledger fabric-token-sdk](https://github.com/hyperledger-labs/fabric-token-sdk) — UTXO-based token SDK with ZK privacy
 - [Hyperledger fabric-smart-client](https://github.com/hyperledger-labs/fabric-smart-client) — the FSC layer beneath
 
+---
 
 ## 👤 Author
 
@@ -220,6 +233,7 @@ const displayText = lines
 - fabric-token-sdk contributions: [view PRs](https://github.com/hyperledger-labs/fabric-token-sdk/pulls?q=is%3Apr+author%3Asid200727)
 - fabric-smart-client contributions: [view PRs](https://github.com/hyperledger-labs/fabric-smart-client/pulls?q=is%3Apr+author%3Asid200727)
 
+---
 
 ## License
 
