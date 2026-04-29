@@ -10,7 +10,7 @@
 **Three AI agents with distinct personalities co-own tokens.**  
 **They debate every transaction. They argue with each other. They sign — or refuse.**
 
-[**▶ Live Demo**](https://sid200727.github.io/ai-multisig-wallet) · [**PR #1597**](https://github.com/hyperledger-labs/fabric-token-sdk/pull/1597) · [**About boolpolicy**](#-the-boolpolicy-engine)
+[**▶ Live Demo**](https://sid200727.github.io/AI_Multi-Sig_Wallet/) · [**PR #1597**](https://github.com/hyperledger-labs/fabric-token-sdk/pull/1597) · [**About boolpolicy**](#-the-boolpolicy-engine)
 
 </div>
 
