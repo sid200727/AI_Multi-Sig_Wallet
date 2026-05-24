@@ -43,7 +43,7 @@ Here, each signer `$N` is replaced by a **Claude AI agent** with a unique person
 Each agent is a separate Claude API call with a carefully crafted system prompt. They receive what previous agents said and **react to each other** — making the debate feel genuinely dynamic.
 
 
-## 🔑 Getting Your API Key (Free — No Credit Card)
+## 🔑 Getting Your API Key (Free: No Credit Card)
 
 This app uses the **Google Gemini API** which has a **completely free tier** — no credit card required.
 
