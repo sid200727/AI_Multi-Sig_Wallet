@@ -45,7 +45,7 @@ Each agent is a separate Claude API call with a carefully crafted system prompt.
 
 ## 🔑 Getting Your API Key (Free: No Credit Card)
 
-This app uses the **Google Gemini API** which has a **completely free tier** — no credit card required.
+This app uses the **Google Gemini API** which has a **completely free tier** . NO credit card required.
 
 **Step-by-step:**
 
